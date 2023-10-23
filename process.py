@@ -12,13 +12,17 @@ def load_data(data_src_dir):
         if "finished" in item.as_posix():
             for file in item.iterdir():
                 filename = file.name.strip(file.suffix)
-                if "strip" in file.as_posix():
-                    with open(file, "r") as f:
-                        data = json.load(f)
-                        sample_filter_list[filename] = data
+                
                 if "activation" in file.as_posix():
                     continue
+                if "rap" in file.as_posix():
+                    continue
                 if ".log" not in file.as_posix():
+                    if "strip" in file.as_posix():
+                        with open(file, "r") as f:
+                            data = json.load(f)
+                            sample_filter_list[filename] = data
+                        continue
                     data = {}
                     with open(file, "r") as f:
                         data = json.load(f)
@@ -43,15 +47,15 @@ def load_data(data_src_dir):
     return failed_list, finished_list, sample_filter_list
 def get_sf_data(sample_filter_list):
     data = []
-    for filename in finished_list.keys():
+    for filename in sample_filter_list.keys():
         try:
             data_type, attack, dataset, model, _, pratio = filename.split("-")
             defense = "-"
         except:
             data_type, attack, dataset, model, _, pratio, defense = filename.split("-")
 
-        c_acc, b_acc, asr, ra = itemgetter("c-acc", "b-acc", "asr", "ra")(
-            finished_list[filename]
+        tp, tn, fp, fn, acc, err, sen, pre, recall, f1 = itemgetter("tp", "tn", "fp", "fn", "acc", "err", "sen", "pre", "recall", "f1")(
+            sample_filter_list[filename]
         )
         keys = [
             "data_type",
@@ -60,10 +64,7 @@ def get_sf_data(sample_filter_list):
             "dataset",
             "model",
             "pratio",
-            "c-acc",
-            "b-acc",
-            "asr",
-            "ra",
+            "tp", "tn", "fp", "fn", "acc", "err", "sen", "pre", "recall", "f1",
         ]
         values = [
             data_type,
@@ -72,10 +73,7 @@ def get_sf_data(sample_filter_list):
             dataset,
             model,
             pratio,
-            c_acc,
-            b_acc,
-            asr,
-            ra,
+        tp, tn, fp, fn, acc, err, sen, pre, recall, f1,
         ]
         cur_data = {}
         for k, v in zip(keys, values):
@@ -127,8 +125,8 @@ def get_format_data(finished_list):
     return data
 
 
-def write2csv(data):
-    with open("data.csv", "w", encoding="utf8", newline="") as output_file:
+def write2csv(data, filename):
+    with open(filename, "w", encoding="utf8", newline="") as output_file:
         fc = csv.DictWriter(
             output_file,
             fieldnames=data[0].keys(),
@@ -138,11 +136,12 @@ def write2csv(data):
 
 
 if __name__ == "__main__":
-    data_src_dir = Path(__file__).parent.parent / "dataset_collections"
+    data_src_dir = Path(__file__).parent.parent / "logs/collections"
     failed_list, finished_list, sample_filter_list = load_data(data_src_dir)
     data = get_format_data(finished_list)
     sf_data = get_sf_data(sample_filter_list)
-    with open("data.json", "w", encoding="utf-8") as f:
-        json.dump(data, f)
-    write2csv(data)
+    # with open("data.json", "w", encoding="utf-8") as f:
+        # json.dump(data, f)
+    write2csv(data, "atk_data.csv")
+    write2csv(sf_data, "strip_data.csv")
     print("data saved in: ./data.csv")
