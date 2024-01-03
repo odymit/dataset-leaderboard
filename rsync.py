@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import yaml
@@ -14,6 +15,7 @@ def load_server_config(path=PROJECT_DIR / "sydata.secrets"):
 
 def rsync_to_local():
     print("-" * 5, " syncing results to remote server ", "-" * 5)
+    os.system("echo $(date)")
     config = load_server_config()
     local_dir = PROJECT_DIR / "logs"
     host = config["host"]
@@ -30,6 +32,7 @@ def rsync_to_local():
     child.expect(".*password.*")
     child.sendline(config["passwd"])
     child.wait()
+    os.system("echo $(date)")
     print("-" * 5, " syncing results done! ", "-" * 5)
 
 

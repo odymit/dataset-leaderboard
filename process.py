@@ -140,7 +140,7 @@ def write2csv(data, filename):
 
 
 def process():
-    data_src_dir = Path(__file__).parent.parent / "logs"
+    data_src_dir = Path(__file__).parent / "logs"
     failed_list, finished_list = load_data(data_src_dir)
     # print(failed_list, finished_list)
     data = get_format_data(finished_list)
