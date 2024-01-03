@@ -1,7 +1,7 @@
 import csv
 import json
-from operator import itemgetter
 import os
+from operator import itemgetter
 from pathlib import Path
 
 
@@ -139,7 +139,7 @@ def write2csv(data, filename):
         fc.writerows(data)
 
 
-if __name__ == "__main__":
+def process():
     data_src_dir = Path(__file__).parent.parent / "logs"
     failed_list, finished_list = load_data(data_src_dir)
     # print(failed_list, finished_list)
@@ -149,3 +149,7 @@ if __name__ == "__main__":
     write2csv(data, "data.csv")
     # write2csv(sf_data, "strip_data.csv")
     print("data saved in: ./data.csv")
+
+
+if __name__ == "__main__":
+    process()
